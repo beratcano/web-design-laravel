@@ -1,0 +1,79 @@
+# Docker Compose dosya formatının sürümünü belirtir.
+version: '3.8'
+
+# Çalıştırılacak servisleri (konteynerları) tanımlar.
+services:
+
+  # Uygulama servisi (PHP-FPM)
+  app:
+    # Bu servisin nasıl inşa edileceğini belirtir. Mevcut dizindeki Dockerfile'ı kullanır.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Konteyner için özel bir isim belirler.
+    container_name: laravel_app
+    # Konteyner durduğunda, manuel olarak durdurulmadıkça yeniden başlatılmasını sağlar.
+    restart: unless-stopped
+    # Konteyner içindeki çalışma dizinini belirler.
+    working_dir: /var/www
+    # Yerel dizini konteyner içindeki dizine bağlar. Dosya senkronizasyonu sağlar.
+    volumes:
+      - ./:/var/www
+    # Bu servisin bağlanacağı ağı belirtir.
+    networks:
+      - laravel
+
+  # Web sunucusu servisi (Nginx)
+  webserver:
+    # Kullanılacak Nginx imajını belirtir. Alpine sürümü daha küçüktür.
+    image: nginx:alpine
+    # Konteyner için özel bir isim belirler.
+    container_name: laravel_nginx
+    # Konteyner durduğunda, manuel olarak durdurulmadıkça yeniden başlatılmasını sağlar.
+    restart: unless-stopped
+    # Yerel 8000 portunu konteynerin 80 portuna yönlendirir.
+    ports:
+      - "2020:80"
+    # Yerel proje dosyalarını ve Nginx konfigürasyonunu konteyner içine bağlar.
+    volumes:
+      - ./:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    # Bu servisin bağlanacağı ağı belirtir.
+    networks:
+      - laravel
+    # Bu servisin 'app' servisinden sonra başlamasını sağlar.
+    depends_on:
+      - app
+
+  # Veritabanı servisi (PostgreSQL)
+  db:
+    # Kullanılacak PostgreSQL imajını belirtir. Belirli bir sürüm kullanmak daha kararlıdır.
+    image: postgres:15-alpine
+    # Konteyner için özel bir isim belirler.
+    container_name: laravel_postgres
+    # Konteyner durduğunda, manuel olarak durdurulmadıkça yeniden başlatılmasını sağlar.
+    restart: unless-stopped
+    # Veritabanı için gerekli ortam değişkenlerini (kullanıcı adı, şifre, db adı) ayarlar.
+    environment:
+      POSTGRES_DB: laravel
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    # Veritabanı verilerinin kalıcı olmasını sağlayan volume'ü bağlar.
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # Dışarıdan bir veritabanı istemcisi ile bağlanmak için port yönlendirmesi yapar.
+    ports:
+      - "54321:5432"
+    # Bu servisin bağlanacağı ağı belirtir.
+    networks:
+      - laravel
+
+# Servislerin birbirleriyle iletişim kurmasını sağlayan ağı tanımlar.
+networks:
+  laravel:
+    driver: bridge
+
+# Veritabanı verilerinin kalıcı olarak saklanacağı volume'ü tanımlar.
+volumes:
+  db-data:
+    driver: local
