@@ -68,3 +68,34 @@ Bu repo, Nginx ve PostgreSQL kullanarak Laravel projeleri geliştirmek için haz
 Kurulum tamamlandı. Artık projenize tarayıcınızdan erişebilirsiniz:
 
 **http://localhost:2020**
+
+### Development
+
+**Create a new controller**
+
+```bash
+docker compose exec app php laravel/artisan make:controller TempController
+```
+
+**Create a new customer model**
+
+```bash
+docker compose exec app php laravel/artisan make:model Customers -m
+```
+
+Then, update the migration file `laravel/database/migrations/2025_11_05_082818_create_customers_table.php` to add the `name` and `surname` columns:
+
+```php
+Schema::create('customers', function (Blueprint $table) {
+    $table->id();
+    $table->string("name");
+    $table->string("surname");
+    $table->timestamps();
+});
+```
+
+Finally, run the migration:
+
+```bash
+docker compose exec app php laravel/artisan migrate:fresh
+```
