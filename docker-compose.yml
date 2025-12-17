@@ -1,5 +1,4 @@
 # Docker Compose dosya formatının sürümünü belirtir.
-version: '3.8'
 
 # Çalıştırılacak servisleri (konteynerları) tanımlar.
 services:
