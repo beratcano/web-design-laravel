@@ -99,3 +99,36 @@ Finally, run the migration:
 ```bash
 docker compose exec app php laravel/artisan migrate:fresh
 ```
+
+## Recent Updates and Fixes (Dec 2025)
+
+### 1. HTTP 500 Error Resolution
+- **Issue**: The application failed to load due to missing environment configuration and file permissions.
+- **Fixes**:
+    - Configured `.env` with correct PostgreSQL credentials (`db`, `user`, `password`).
+    - Set file permissions for `storage` and `bootstrap/cache` directories.
+    - Cleared application cache.
+
+### 2. Customer Management Features
+- **Create Customer Form**:
+    - Implemented `GET /customers/create` and `POST /customers` routes within the `auth` middleware.
+    - Created `CustomerController` with `create` and `store` methods.
+    - Added a responsive Blade view `customers/create.blade.php` using Tailwind CSS.
+- **Customer Listing**:
+    - Implemented `GET /customers` route and `index` method in `CustomerController`.
+    - Created `customers/list.blade.php` to display customers.
+    - Resolved "Target class does not exist" errors by correctly importing the controller.
+
+### 3. Database Schema Updates
+The migrations were updated to align with the project models and design requirements.
+
+- **Schema Changes**:
+    - `customers`: Added `surname`, `birthYear`, `gender`.
+    - `meals`: Added `customer_id`, `food_id`, `mealtime`, `like`.
+    - `food`: Added `name`, `major`, `calori`.
+    - `exercises`: Added `name`, `type`, `unit`, `calori`.
+    - `activities`: Added `customer_id`, `exercise_id`, `repetition`, `calori`, `like`, `duration`.
+- **Migration Fixes**:
+    - Renamed migration files to ensure correct execution order (Food before Meals).
+    - Ran `php artisan migrate:fresh --seed` to apply changes and seed the database.
+
