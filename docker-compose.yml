@@ -22,6 +22,23 @@ services:
     networks:
       - laravel
 
+  # Vite Development Server
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_vite
+    restart: unless-stopped
+    working_dir: /var/www/laravel
+    volumes:
+      - ./:/var/www
+    ports:
+      - "5173:5173"
+    networks:
+      - laravel
+    command: ["npm", "run", "dev"]
+
+
   # Web sunucusu servisi (Nginx)
   webserver:
     # Kullanılacak Nginx imajını belirtir. Alpine sürümü daha küçüktür.
@@ -76,3 +93,4 @@ networks:
 volumes:
   db-data:
     driver: local
+
